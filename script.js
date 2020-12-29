@@ -96,6 +96,49 @@ function addDepartment() {
     });
 }
 
+function addRole() {
+  connection.query("SELECT id, name FROM department", function (err, res) {
+    if (err) throw err;
+    let departments = res.map(function (r) {
+      return { name: r.name, value: r.id };
+    });
+
+    let questions = [
+      {
+        name: "department",
+        type: "list",
+        message: "Select the department you'd like to add the role to",
+        choices: departments,
+      },
+      {
+        name: "title",
+        type: "input",
+        message: "What is the title of the role? ",
+      },
+
+      {
+        name: "salary",
+        type: "input",
+        message: "What is the salary for this role? ",
+        validate: function (value) {
+          return !isNaN(value);
+        },
+      },
+    ];
+
+    inquirer.prompt(questions).then(function (answers) {
+      connection.query(
+        "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)",
+        [answers.title, answers.salary, answers.department],
+        function (error) {
+          if (error) throw err;
+          mainMenu();
+        }
+      );
+    });
+  });
+}
+
 function mainMenu() {
   inquirer
     .prompt({
@@ -126,6 +169,9 @@ function mainMenu() {
           break;
         case INITIAL_MENU_ITEMS.ADD_DEPARTMENT:
           addDepartment();
+          break;
+        case INITIAL_MENU_ITEMS.ADD_ROLE:
+          addRole();
           break;
       }
     });
