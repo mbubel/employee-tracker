@@ -33,33 +33,46 @@ let INITIAL_MENU_ITEMS = {
   EXIT: "Exit",
 };
 
-function viewDepartments() {
-  connection.query("SELECT name FROM department", function (err, res) {
-    if (err) throw err;
-    console.log(" ");
-    console.table(res);
-  });
+function printResults(err, res) {
+  if (err) throw err;
+  console.log(" ");
+  console.table(res);
 }
+
+function viewDepartments() {
+  connection.query("SELECT name FROM department", printResults);
+}
+
 function viewRoles() {
   connection.query(
-    "SELECT d.name AS department, r.title, r.salary FROM role r INNER JOIN department d ON r.department_id = d.id",
-    function (err, res) {
-      if (err) throw err;
-      console.log(" ");
-
-      console.table(res);
-    }
+    `SELECT 
+    d.name AS department, r.title, r.salary
+FROM
+    role r
+        INNER JOIN
+    department d ON r.department_id = d.id`,
+    printResults
   );
 }
 
 function viewEmployees() {
   connection.query(
-    "SELECT e.first_name, e.last_name, d.name AS department, r.title, r.salary, m.first_name manager_first_name FROM employee e INNER JOIN role r ON e.role_id = r.id LEFT JOIN employee m on m.id = e.manager_id INNER JOIN department d ON r.department_id = d.id",
-    function (err, res) {
-      if (err) throw err;
-      console.log(" ");
-      console.table(res);
-    }
+    `SELECT 
+    e.first_name,
+    e.last_name,
+    d.name AS department,
+    r.title,
+    r.salary,
+    m.first_name manager_first_name
+FROM
+    employee e
+        INNER JOIN
+    role r ON e.role_id = r.id
+        LEFT JOIN
+    employee m ON m.id = e.manager_id
+        INNER JOIN
+    department d ON r.department_id = d.id`,
+    printResults
   );
 }
 
