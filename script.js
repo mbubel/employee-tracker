@@ -131,11 +131,76 @@ function addRole() {
         "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)",
         [answers.title, answers.salary, answers.department],
         function (error) {
-          if (error) throw err;
+          if (error) throw error;
           mainMenu();
         }
       );
     });
+  });
+}
+
+function addEmployee() {
+  connection.query("SELECT title, id FROM role", function (err, res) {
+    if (err) throw err;
+    connection.query(
+      "SELECT id, first_name, last_name FROM employee",
+      function (errTwo, employeeResults) {
+        if (errTwo) throw errTwo;
+        let roles = res.map(function (m) {
+          return { name: m.title, value: m.id };
+        });
+        let employees = employeeResults.map(function (e) {
+          return { name: e.first_name + " " + e.last_name, value: e.id };
+        });
+        employees.push({
+            name: "No Manager",
+            value: null
+        });
+        let employeeQuestions = [
+          {
+            name: "role",
+            type: "list",
+            message: "What is their role?",
+            choices: roles,
+          },
+          {
+            name: "manager",
+            type: "list",
+            message: "Who is their manager?",
+            choices: employees,
+          },
+          {
+            name: "first_name",
+            type: "input",
+            message: "What is their first name?",
+          },
+          {
+            name: "last_name",
+            type: "input",
+            message: "What is their last name?",
+          },
+        ];
+        inquirer.prompt(employeeQuestions).then(function (answers) {
+          connection.query(
+            "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)",
+            [
+              answers.first_name,
+              answers.last_name,
+              answers.role,
+              answers.manager,
+            ],
+            function (error) {
+              if (error) {
+                  console.log(error);
+                  throw error;
+                }
+              mainMenu();
+            }
+          );
+  
+        });
+      }
+    );
   });
 }
 
@@ -172,6 +237,9 @@ function mainMenu() {
           break;
         case INITIAL_MENU_ITEMS.ADD_ROLE:
           addRole();
+          break;
+        case INITIAL_MENU_ITEMS.ADD_EMPLOYEE:
+          addEmployee();
           break;
       }
     });
