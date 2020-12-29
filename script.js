@@ -23,7 +23,7 @@ connection.connect(function (err) {
 });
 
 let INITIAL_MENU_ITEMS = {
-  ADD_DEPARTMENT: "Add a deparment",
+  ADD_DEPARTMENT: "Add a department",
   ADD_ROLE: "Add a role",
   ADD_EMPLOYEE: "Add an employee",
   VIEW_DEPARTMENTS: "View departments",
@@ -37,6 +37,7 @@ function printResults(err, res) {
   if (err) throw err;
   console.log(" ");
   console.table(res);
+  mainMenu();
 }
 
 function viewDepartments() {
@@ -76,6 +77,25 @@ FROM
   );
 }
 
+function addDepartment() {
+  inquirer
+    .prompt({
+      name: "action",
+      type: "input",
+      message: "What's the name of the new department?",
+    })
+    .then(function (answer) {
+      connection.query(
+        "INSERT INTO department (name) VALUES (?)",
+        [answer.action],
+        function (error) {
+          if (error) throw err;
+          mainMenu();
+        }
+      );
+    });
+}
+
 function mainMenu() {
   inquirer
     .prompt({
@@ -104,7 +124,9 @@ function mainMenu() {
         case INITIAL_MENU_ITEMS.VIEW_EMPLOYEES:
           viewEmployees();
           break;
+        case INITIAL_MENU_ITEMS.ADD_DEPARTMENT:
+          addDepartment();
+          break;
       }
-      mainMenu();
     });
 }
