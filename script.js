@@ -153,8 +153,8 @@ function addEmployee() {
           return { name: e.first_name + " " + e.last_name, value: e.id };
         });
         employees.push({
-            name: "No Manager",
-            value: null
+          name: "No Manager",
+          value: null,
         });
         let employeeQuestions = [
           {
@@ -191,17 +191,65 @@ function addEmployee() {
             ],
             function (error) {
               if (error) {
-                  console.log(error);
-                  throw error;
-                }
+                console.log(error);
+                throw error;
+              }
               mainMenu();
             }
           );
-  
         });
       }
     );
   });
+}
+
+function updateEmployee() {
+  connection.query(
+    "SELECT id, first_name, last_name FROM employee",
+    function (err, employeeResults) {
+      if (err) throw err;
+      connection.query(
+        "SELECT id, title FROM role",
+        function (errTwo, roleResults) {
+          if (errTwo) throw errTwo;
+          let roles = roleResults.map(function (m) {
+            return { name: m.title, value: m.id };
+          });
+          let employees = employeeResults.map(function (e) {
+            return { name: e.first_name + " " + e.last_name, value: e.id };
+          });
+          
+          let employeeUpdateQuestions = [
+            {
+              name: "employee",
+              type: "list",
+              message: "Who do you want to update?",
+              choices: employees,
+            },
+            {
+              name: "role",
+              type: "list",
+              message: "What is their new role?",
+              choices: roles,
+            },
+          ];
+          inquirer.prompt(employeeUpdateQuestions).then(function (answers) {
+            connection.query(
+              "UPDATE employee SET role_id = ? WHERE id = ?",
+              [answers.role, answers.employee],
+              function (error) {
+                if (error) {
+                  console.log(error);
+                  throw error;
+                }
+                mainMenu();
+              }
+            );
+          });
+        }
+      );
+    }
+  );
 }
 
 function mainMenu() {
@@ -240,6 +288,9 @@ function mainMenu() {
           break;
         case INITIAL_MENU_ITEMS.ADD_EMPLOYEE:
           addEmployee();
+          break;
+        case INITIAL_MENU_ITEMS.UPDATE_EMPLOYEE_ROLE:
+          updateEmployee();
           break;
       }
     });
