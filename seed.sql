@@ -14,7 +14,7 @@ VALUES
     (1, 'Front End', 5.00, 1),
     (2, 'Back End', 5.00, 1),
     (3, 'Accountant', 3.50, 2),
-    (4, 'Fullfillment', 2.00, 3),
+    (4, 'Fulfillment', 2.00, 3),
     (5, 'Royalty', 1000000.99, 4);
 
 INSERT INTO
