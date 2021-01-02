@@ -265,9 +265,6 @@ function updateManager() {
         "SELECT id, title FROM role",
         function (errThree, managerResults) {
           if (errThree) throw errThree;
-        //   let managers = managerResults.map(function (y) {
-        //     return { name: y.first_name + " " + y.last_name, value: y.id };
-        //   });
           let managerUpdateQuestions = [
             {
               name: "employee",
