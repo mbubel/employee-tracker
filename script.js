@@ -30,6 +30,7 @@ let INITIAL_MENU_ITEMS = {
   VIEW_ROLES: "View roles",
   VIEW_EMPLOYEES: "View employees",
   UPDATE_EMPLOYEE_ROLE: "Update employee role",
+  UPDATE_EMPLOYEE_MANAGER: "Update employee manager",
   EXIT: "Exit",
 };
 
@@ -218,7 +219,7 @@ function updateEmployee() {
           let employees = employeeResults.map(function (e) {
             return { name: e.first_name + " " + e.last_name, value: e.id };
           });
-          
+
           let employeeUpdateQuestions = [
             {
               name: "employee",
@@ -252,6 +253,54 @@ function updateEmployee() {
   );
 }
 
+function updateManager() {
+  connection.query(
+    "SELECT id, first_name, last_name FROM employee",
+    function (err, empRes) {
+      if (err) throw err;
+      let managersOne = empRes.map(function (m) {
+        return { name: m.first_name + " " + m.last_name, value: m.id };
+      });
+      connection.query(
+        "SELECT id, title FROM role",
+        function (errThree, managerResults) {
+          if (errThree) throw errThree;
+        //   let managers = managerResults.map(function (y) {
+        //     return { name: y.first_name + " " + y.last_name, value: y.id };
+        //   });
+          let managerUpdateQuestions = [
+            {
+              name: "employee",
+              type: "list",
+              message: "Who is the new manager?",
+              choices: managersOne,
+            },
+            {
+              name: "manager",
+              type: "list",
+              message: "Who are they managing?",
+              choices: managersOne,
+            },
+          ];
+          inquirer.prompt(managerUpdateQuestions).then(function (answers) {
+            connection.query(
+              "UPDATE employee SET manager_id = ? WHERE id = ?",
+              [answers.employee, answers.manager],
+              function (error) {
+                if (error) {
+                  console.log(error);
+                  throw error;
+                }
+                mainMenu();
+              }
+            );
+          });
+        }
+      );
+    }
+  );
+}
+
 function mainMenu() {
   inquirer
     .prompt({
@@ -266,6 +315,7 @@ function mainMenu() {
         INITIAL_MENU_ITEMS.VIEW_ROLES,
         INITIAL_MENU_ITEMS.VIEW_EMPLOYEES,
         INITIAL_MENU_ITEMS.UPDATE_EMPLOYEE_ROLE,
+        INITIAL_MENU_ITEMS.UPDATE_EMPLOYEE_MANAGER,
         INITIAL_MENU_ITEMS.EXIT,
       ],
     })
@@ -291,6 +341,9 @@ function mainMenu() {
           break;
         case INITIAL_MENU_ITEMS.UPDATE_EMPLOYEE_ROLE:
           updateEmployee();
+          break;
+        case INITIAL_MENU_ITEMS.UPDATE_EMPLOYEE_MANAGER:
+          updateManager();
           break;
       }
     });
